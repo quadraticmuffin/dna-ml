@@ -38,8 +38,8 @@ def fret (em, ex):
     J *= em["qy"] * ex["ec"]
     return J
 
-with open('spectra.json', 'r', encoding='utf-8') as f:
-    data = json.load(f)
+with open('FPBase Data.json', 'r', encoding='utf-8') as f:
+    fpbase_data = json.load(f)
 
 def test1(): 
     fluor1 = data[0]["spectra"]
@@ -74,7 +74,8 @@ def clean(spectrum):
         arr[int(item[0])] = item[1]
     return arr
 
-# generate separate JSON lists for emission and excitation data
+# generate separate JSON lists for emission and excitation data from FPBase
+# Mostly (if not all) fluorescent proteins, few to no organic dyes etc.
 def separate(data):
     em = []
     ex = []
@@ -102,10 +103,55 @@ def separate(data):
         return spectrum["max"]
 
     em.sort(key=getMax)
-    with open('emission.json', 'w', encoding='utf-8') as f:
+    with open('fpbase_emission.json', 'w', encoding='utf-8') as f:
         json.dump(em, f, ensure_ascii=False, indent=4)
+    print("FPBase Emission done")
     ex.sort(key=getMax)
-    with open('excitation.json', 'w', encoding='utf-8') as f:
+    with open('fpbase_excitation.json', 'w', encoding='utf-8') as f:
         json.dump(ex, f, ensure_ascii=False, indent=4)
+    print ("FPBase Excitation done")
 
-separate(data)
+# separate(fpbase_data)
+del(fpbase_data)
+
+# From Arizona 
+# Cleaned files: turned into JSON format, removed some NULL entries
+
+def arizona_compile_and_separate():
+    arizona_data = [{} for i in range(2000)]
+
+    with open('Arizona Items.json', 'r', encoding='utf-8') as f:
+        arizona_items = json.load(f)
+    for item in arizona_items:
+        arizona_data[int(item[0])]["name"] = item[1]
+        arizona_data[int(item[0])]["state"] = item[3]
+    del(arizona_items)
+
+    with open('Arizona Info.json', 'r', encoding='utf-8') as f:
+        arizona_info = json.load(f)
+    for item in arizona_info:
+        arizona_data[int(item[0])][item[1]] = item[2]
+    del(arizona_info)
+
+    with open('Arizona Spectra.json', 'r', encoding='utf-8') as f:
+        arizona_spectra = json.load(f)
+    for fluor in arizona_data:
+        fluor["data"] = [0]*1000
+    for item in arizona_spectra:
+        if "state" in arizona_data[int(item[0])] and any(arizona_data[int(item[0])]["state"] == i for i in ["EX", "EM", "AB"]):
+            if item[1] >= 1000: 
+                # TODO fix this... do i really need to worry about any wavelengths over 1000 nm?
+                continue
+            arizona_data[int(item[0])]["data"][int(item[1])] = item[2]
+        # arizona_spectra contains non-integer wavelengths; I ignore and round.
+        # jk this might be a bad idea, for the spectra that also skip wavelengths. 
+        # I think I have to just make a smarter Forster radius function
+        # which accounts for this with thicker/thinner Riemann sum.
+    del(arizona_spectra)
+
+    with open('Arizona Data.json', 'w', encoding='utf-8') as f:
+        json.dump(arizona_data, f, ensure_ascii=False, indent=4)
+    
+    
+    print ("Arizona done")
+arizona_compile_and_separate()
