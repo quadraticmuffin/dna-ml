@@ -1,0 +1,3 @@
+6-HEX (id 17): Extinction Coefficient and Wavelength used to determine EC were switched.
+Changed a few NULL values to ""
+Deleted entries with NULL id 

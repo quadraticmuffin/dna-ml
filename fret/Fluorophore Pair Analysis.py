@@ -103,13 +103,13 @@ def separate(data):
         return spectrum["max"]
 
     em.sort(key=getMax)
-    with open('fpbase_emission.json', 'w', encoding='utf-8') as f:
+    with open('FPBase Emission.json', 'w', encoding='utf-8') as f:
         json.dump(em, f, ensure_ascii=False, indent=4)
     print("FPBase Emission done")
     ex.sort(key=getMax)
-    with open('fpbase_excitation.json', 'w', encoding='utf-8') as f:
+    with open('FPBase Excitation.json', 'w', encoding='utf-8') as f:
         json.dump(ex, f, ensure_ascii=False, indent=4)
-    print ("FPBase Excitation done")
+    print ("FPBase Excitation done") # TODO are em and ex flipped? 
 
 # separate(fpbase_data)
 del(fpbase_data)
@@ -139,8 +139,10 @@ def arizona_compile_and_separate():
         fluor["data"] = [0]*1000
     for item in arizona_spectra:
         if "state" in arizona_data[int(item[0])] and any(arizona_data[int(item[0])]["state"] == i for i in ["EX", "EM", "AB"]):
-            if item[1] >= 1000: 
+            if item[1] >= 1000 or item[2] > 1: 
                 # TODO fix this... do i really need to worry about any wavelengths over 1000 nm?
+                # and I don't know what unit is being used when item[2] goes over 1.
+                # It's definitely not relative intensity anymore.
                 continue
             arizona_data[int(item[0])]["data"][int(item[1])] = item[2]
         # arizona_spectra contains non-integer wavelengths; I ignore and round.
@@ -152,6 +154,89 @@ def arizona_compile_and_separate():
     with open('Arizona Data.json', 'w', encoding='utf-8') as f:
         json.dump(arizona_data, f, ensure_ascii=False, indent=4)
     
-    
+    em = []
+    ex = []
+    for fluor in arizona_data:
+        state = fluor["state"]
+        newItem = {}
+        newItem["name"] = fluor["name"]
+        newItem["state"] = state
+        newItem["max"] = fluor["max"] #TODO This goes by different names in Arizona
+
+        if state == "EM":
+            newItem["qy"] = fluor["qy"] #TODO this too
+            newItem["data"] = fluor["data"]
+            em.append(newItem)
+
+        else: # if not emission, must be excitation
+            newItem["ec"] = fluor["ec"] #TODO this too
+            newItem["data"] = fluor["data"]
+            ex.append(newItem)
+
+    def getMax(fluor):
+        if fluor["max"] is None:
+            return 12345
+        return fluor["max"]
+
+    em.sort(key=getMax)
+    with open('Arizona Emission.json', 'w', encoding='utf-8') as f:
+        json.dump(em, f, ensure_ascii=False, indent=4)
+    print("FPBase Emission done")
+    ex.sort(key=getMax)
+    with open('Arizona Excitation.json', 'w', encoding='utf-8') as f:
+        json.dump(ex, f, ensure_ascii=False, indent=4)
+
     print ("Arizona done")
-arizona_compile_and_separate()
+# arizona_compile_and_separate()
+
+import scipy.integrate
+import numpy as np
+PI = np.pi
+AVOGADRO = 6.022e23 # molecules / mole
+LIGHT_SPEED = 3e8 # m/s
+# Forster radius
+#TODO brUH WHAT UNITS DOES THIS OUTPUT
+def calc_forster_radius(donor_emission = None, acceptor_absorbance = None, wavelength_low = None, wavelength_high = None, kappa2 = 2./3, quant_yield = 1.0, refractive_index = 1.4):
+    # donor_emission: 1D numpy array, units of inverse distance
+    # acceptor_absorbance: 1D numpy array, in terms of wavelength, units of inverse concentration * inverse distance
+    # wavelength_low, wavelength_high: float, units of distance
+    # kappa2 (default 2/3): float, unitless
+    # quant_yield (default 1.0): float, unitless
+    # refractive_index: float, unitless
+
+    assert(donor_emission is not None)
+    assert(acceptor_absorbance is not None)
+    assert(len(donor_emission) == len(acceptor_absorbance))
+
+    if quant_yield is None: #TODO fix this abomination? why are some of the quantum yields 0
+        quant_yield = 1.0
+    coeff = 9. * np.log(10) * kappa2 * quant_yield / (128. * PI**5 * AVOGADRO * refractive_index**4)
+    #   step_size = (wavelength_high - wavelength_low) / (len(donor_emission)-1)
+    step_size = 1
+    
+    integral = scipy.integrate.simps(donor_emission * acceptor_absorbance * np.arange(wavelength_low, wavelength_high+step_size/2, step_size)**4) * step_size
+    #print coeff, integral
+    return (coeff * integral)**(1./6)
+
+with open('FPBase Emission.json', 'r', encoding='utf-8') as f:
+    fpbase_emission = json.load(f)
+with open('FPBase Excitation.json', 'r', encoding='utf-8') as f:
+    fpbase_excitation = json.load(f)
+results = [0] * 75000
+i=0
+for donor in fpbase_emission:
+    for acceptor in fpbase_excitation:
+        result = ("donor: " + donor["name"],"acceptor: " + acceptor["name"], 
+        # "Avg wavelength: " + str(donor["max"]/2 + acceptor["max"]/2), 
+        "Forster radius: " + str(calc_forster_radius(np.array(donor["data"]), np.array(acceptor["data"]), wavelength_low=0, wavelength_high=999, quant_yield=donor["qy"])))
+        results[i] = result
+        i += 1
+def temp(x): #TODO deal with this...
+    if isinstance(x, int):
+        return -1000000
+    return -x[2]
+results.sort(key=temp)
+results = results[results.count(0):]
+with open('Results.json', 'w', encoding='utf-8') as f:
+    json.dump(results, f, ensure_ascii=False, indent=4)
+print("done ayyyyy")
