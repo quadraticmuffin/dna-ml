@@ -211,32 +211,94 @@ def calc_forster_radius(donor_emission = None, acceptor_absorbance = None, wavel
     if quant_yield is None: #TODO fix this abomination? why are some of the quantum yields 0
         quant_yield = 1.0
     coeff = 9. * np.log(10) * kappa2 * quant_yield / (128. * PI**5 * AVOGADRO * refractive_index**4)
-    #   step_size = (wavelength_high - wavelength_low) / (len(donor_emission)-1)
-    step_size = 1
+    # step_size = (wavelength_high - wavelength_low) / (len(donor_emission)-1)
+    # step_size = 1
+    em, ab = interpolate(donor_emission, acceptor_absorbance)
     
-    integral = scipy.integrate.simps(donor_emission * acceptor_absorbance * np.arange(wavelength_low, wavelength_high+step_size/2, step_size)**4) * step_size
-    #print coeff, integral
+    # integrate
+    integral = 0
+    for i in range(len(em) - 1):
+        step_size = em[i+1][0] - em[i][0]
+        lam = em[i][0]
+        integral += step_size * lam**4 * em[i][1] * ab[i][1]
+    # integral = scipy.integrate.simps(donor_emission * acceptor_absorbance * np.arange(wavelength_low, wavelength_high+step_size/2, step_size)**4) * step_size
+    # print (coeff, integral)
     return (coeff * integral)**(1./6)
 
-with open('FPBase Emission.json', 'r', encoding='utf-8') as f:
-    fpbase_emission = json.load(f)
-with open('FPBase Excitation.json', 'r', encoding='utf-8') as f:
-    fpbase_excitation = json.load(f)
-results = [0] * 75000
-i=0
-for donor in fpbase_emission:
-    for acceptor in fpbase_excitation:
-        result = ("donor: " + donor["name"],"acceptor: " + acceptor["name"], 
-        # "Avg wavelength: " + str(donor["max"]/2 + acceptor["max"]/2), 
-        "Forster radius: " + str(calc_forster_radius(np.array(donor["data"]), np.array(acceptor["data"]), wavelength_low=0, wavelength_high=999, quant_yield=donor["qy"])))
-        results[i] = result
-        i += 1
-def temp(x): #TODO deal with this...
-    if isinstance(x, int):
-        return -1000000
-    return -x[2]
-results.sort(key=temp)
-results = results[results.count(0):]
-with open('Results.json', 'w', encoding='utf-8') as f:
-    json.dump(results, f, ensure_ascii=False, indent=4)
-print("done ayyyyy")
+def interpolate(a, b):
+    a.sort(key=lambda x: x[0])
+    b.sort(key=lambda x: x[0])
+    floor = max(a[0][0], b[0][0])
+    ceil = min(a[-1][0], b[-1][0])
+    ai = 0
+    bi = 0
+    while a[ai][0] < floor:
+        ai += 1
+    while b[bi][0] < floor:
+        bi += 1
+    
+    while a[ai][0] < ceil or b[bi][0] < ceil:
+        if a[ai][0] > b[bi][0]:
+            a.append([b[bi][0], a[ai-1][1] + (a[ai][1] - a[ai-1][1])
+            *(b[bi][0]-a[ai-1][0])
+            /(a[ai][0]-a[ai-1][0])])
+            bi += 1
+        elif b[bi][0] > a[ai][0]:
+            b.append([a[ai][0], b[bi-1][1] + (b[bi][1] - b[bi-1][1])
+            *(a[ai][0]-b[bi-1][0])
+            /(b[bi][0]-b[bi-1][0])])
+            ai += 1
+        else: 
+            ai += 1
+            bi += 1
+            
+    
+    if a[ai][0] > b[bi][0]:
+        a.append([b[bi][0], a[ai-1][1] + (a[ai][1] - a[ai-1][1])
+        *(b[bi][0]-a[ai-1][0])
+        /(a[ai][0]-a[ai-1][0])])
+    elif b[bi][0] > a[ai][0]:
+        b.append([a[ai][0], b[bi-1][1] + (b[bi][1] - b[bi-1][1])
+        *(a[ai][0]-b[bi-1][0])
+        /(b[bi][0]-b[bi-1][0])])
+
+    a.sort(key=lambda x: x[0])
+    b.sort(key=lambda x: x[0])
+    while a[0][0] < floor:
+        del(a[0])
+    while a[-1][0] > ceil:
+        del(a[-1])
+    while b[0][0] < floor:
+        del(b[0])
+    while b[-1][0] > ceil:
+        del(b[-1])
+    return a,b
+
+a = [[1, 1],[2,2],[3,3],[5,5],[6,6]]
+b = [[0,2],[0.5,2],[1.25,5],[1.75,6],[2,5],[2.25,4],[2.5,2]]
+print (interpolate(a,b)[0])
+print (interpolate(a,b)[1])
+
+def main():
+    with open('FPBase Emission.json', 'r', encoding='utf-8') as f:
+        fpbase_emission = json.load(f)
+    with open('FPBase Excitation.json', 'r', encoding='utf-8') as f:
+        fpbase_excitation = json.load(f)
+    results = [0] * 75000
+    i=0
+    for donor in fpbase_emission:
+        for acceptor in fpbase_excitation:
+            result = ("donor: " + donor["name"],"acceptor: " + acceptor["name"], 
+            # "Avg wavelength: " + str(donor["max"]/2 + acceptor["max"]/2), 
+            "Forster radius: " + str(calc_forster_radius(np.array(donor["data"]), np.array(acceptor["data"]), wavelength_low=0, wavelength_high=999, quant_yield=donor["qy"])))
+            results[i] = result
+            i += 1
+    def temp(x): #TODO deal with this...
+        if isinstance(x, int):
+            return -1000000
+        return -x[2]
+    results.sort(key=temp)
+    results = results[results.count(0):]
+    with open('Results.json', 'w', encoding='utf-8') as f:
+        json.dump(results, f, ensure_ascii=False, indent=4)
+    print("done ayyyyy")
