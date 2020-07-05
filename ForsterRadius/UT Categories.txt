@@ -1,0 +1,61 @@
+['name', 
+merge 'acronym or common name','alternative name', 'Acronym', 'Alternative', 'acronyms and alternative names', 'acronyms or common names', 'alternate name','Full name', 'Long Dye Name', 'Long dye name', 'Dye name', 
+drop 'Common name', 'Name', 'acronmym or common name', 'common name', 'LONG NAME','Dye','dye name',
+
+drop 'type',
+'role', 
+drop '', '2P', '2P brightness', 
+drop '1P primary source', '2P primary source', 'Data source', 'SOURCE', 'Secondary Source', 'Secondary source', 
+    'Source', 'Source for Extinction Coefficient', 'Source`', 'PRIMARY SOURCE', 'Primary Source', 'Primary source', 
+    'primary source', 'reference', 'secondary source', 'source', 'Reference', 'Full Reference', 'Data Source', 
+
+
+
+drop 'Additional Info', 'Comment', 'Comment 2nd', 'Comments', 'NOTES', 'Note', 'Notes', 'note', 'notes', 
+
+drop 'BANDCENTER BANDPASS', 'BANDPASS', 'band edges', 'bandcenter/bandpass',
+drop 'Number bands', 'NUMBER BANDS',
+
+drop 'Brightness', 'Brightness (% of DsRed)', 
+    'CF', 'CF260', 'CF280', 
+    'Category', 'Category of dye', 
+    'Company', 'Contact', 'Data entry', 
+
+merge 'Environment', 'environment', 'solvent', 'Solvent', 'solvent   alternative name', 
+
+drop 'pH', 'pKa',
+
+
+'Ex  Coeff', 'Ex. Coeff', 'Exctinction coefficient', 'Extinction', 'Extinction Coefficient', 'Extinction Coefficient:', 'Extinction Coeficient', 
+'Molar Ex  Coeff', 'Molar Extinction', 'Visible light Extinction coefficient value', 'extinction coefficient', 'extinction coefficient or quantum yield',
+'molar extinction M^-1 cm^-1', 'molar extinction coefficient', 
+
+drop 'FLUOR LIFETIME', 'Lifetime', 'Itensity max', 'Medium', 'Module Configurator',
+    'Location', 'Field19', 'Fluorophore (typical)', 'MANUFACTURER', 'Manufacturer', 'manufacturer',
+    'Have Item', 'intensity max', 'INTENSITY MAX', 'Max intensity', 'Imaging quality', 'Intensity @ 200mm (mW/cm2', 'Intensity max', 
+
+drop 'Mol  Wt', 'Mol Wt.', 'Mol. Wt.', 'Molar Weight', 'Molar Weigth', 'mol. wt.',
+
+drop 'PART NAME',
+
+drop 'Original Data Rescaled By', 'rescaled by (max value)', 'rescaling factor', 'Rescale 2P by:', 'Rescale Em by:', 'Rescale Ex by:', 'Rescaled 2P by:', 
+
+merge 'Quant  Yield', 'Quant. Yield', 'Quantum Yield', 'extinction coefficient or quantum yield'
+
+drop 'R <0> Alexa 488', 'R<0> Val. with AF488 acceptor', 'R<0> Val. with AF546 acceptor', 'R<0> Val. with AF555 acceptor', 'R<0> Val. with AF568 acceptor', 'R<0> Val. with AF594 acceptor', 'R<0> Val. with AF647 acceptor', 'R<0> Value source', 'R<0> Values', 
+    'Test', 'Total Power @ 200 mm (mW)', 'URL', 'URL Quantum Yield', 'URL have item', 'Units', 
+
+merge 'Wavelength of Max Excitation', 'Wavelength Used To Determine Ex. Coeff.', 'ABS', 'Abs/Em maxima', 'EX EM', 'Em max', 'Em max (nm)', 'Ex max', 'Max Wavelength',  'Max wavelength', 'Molar Ex Coeff. Wavelength', 'Visible Light at Ec Wavelength', 'Visible light Extinction coefficient wavelength', 'WAVELENGTH', 
+    'Wavelength Used To Determine Ex  Coeff', 'Wavelength at Ec', 'Wavelength at Ec (Table)', 'Wavelength at Ec (from source)', 'Wavelength at Ec (source)', 'Wavelength at Ec (table)', 'Wavelength at Max Absorption', 
+    'Wavelength at Max Emission', 'Wavelength of Max Absorption', 'Wavelength used to determine Ex. Coeff.', 'Wavelength used to measure Ext Coefficient', 'Wavelength used to measure extinction', 'Wavlength used to measure extinction coefficient', 'max wavelength', 'max wavlength',
+    'visble light Ec wavelength', 'visible light EC wavelength', 'visible light Ec wavelength', 'visible light Ec wavlength', 'visible light at Ec wavelength', 'visible light at Ec wavelenth', 'visible light wavelength', 'visiblle light Ec wavelength', 'wavelength at EC (from table)', 'wavelength at Ec', 'wavelength at Ec (from source', 
+    'wavelength at Ec (from source)', 'wavelength at Ec (from table)', 'wavelength at Ec or Em (table below)', 'wavlelngth at Ec (from source)', 'wavlength at Ec', 'wavlength at Ec (from source)',
+
+drop 'block Ti:Sa', 'category', 'category of dye', 'component of set', 'filename', 'filter lamda', 'filter pass', 'filter wavelength', 
+    'fliter pass', 'full reference', 'have doc', 'have item', 'have spectr', 'have spectrum', 'how many', 'in database', 'in db', 'in system', 
+    'include', 'lot #',  'max value 381 to 700\r\n', 'miscellaneous', 'position', 
+
+drop 'Spectrum Type', 'Spectrum type', 'spectrum type', 'spectrum type (1P,2p)', 'spectrum type (a,x,m)', 'spectrum type (a,x,m, 2P)', 'spectrum type (a,x,m,2p)', 'type (ex, bs, em)', 
+
+drop 't0 5 bleach', 't0 5 bleach (min)', 't0 5 maturatin', 't0 5 maturation (hr)', 't0.5 bleach', 't0.5 bleach (min)', 't0.5 maturatin', 't0.5 maturation (hr)', 
+    'thick (mm)', 'thick(mm)', 'thickness','dia (mm)']
